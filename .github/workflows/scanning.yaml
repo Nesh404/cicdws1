@@ -1,4 +1,4 @@
-name: Security Scanning Workflow
+name: scanning
 
 on:
   push:
@@ -20,9 +20,9 @@ jobs:
 
     - name: Security Scanning
       run: |
-        REM Install Trivy
+        # Install Trivy
         curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.ps1 | powershell -command -
-        REM Scan the Docker image
+        # Scan the Docker image
         trivy --exit-code 0 your-image-to-scan:tag > scan-report.txt
       continue-on-error: true
 
