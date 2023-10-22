@@ -26,7 +26,7 @@ jobs:
 
     - name: Security Scanning
       run: |
-        trivy --exit-code 0 <your-image-to-scan>:<tag> > scan-report.txt
+        trivy --exit-code 0 ganesh4761/go-fortune:v1.0 > scan-report.txt
       continue-on-error: true
 
     - name: Generate Tabular Report
