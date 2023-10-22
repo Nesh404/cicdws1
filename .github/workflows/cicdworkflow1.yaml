@@ -36,7 +36,7 @@ jobs:
 
 
     - name: Send Slack Notification (if vulnerabilities found)
-      uses: rtCamp/action-slack@v3
+      uses: 8398a7/actions-slack@v3
       with:
        text: 'Vulnerabilities found in the codebase.'
        channel: 'your-slack-channel'
@@ -61,7 +61,7 @@ jobs:
 
 
     - name: Send Slack Notification (on success)
-      uses: rtCamp/action-slack@v3
+      uses: 8398a7/actions-slack@v3
       with:
         text: |
            Name: Ganesh Kumar
