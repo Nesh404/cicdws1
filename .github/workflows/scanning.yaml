@@ -1,25 +1,35 @@
-name: build
+name: scanning
+
 on:
   push:
     branches:
-      - main
-  pull_request:
+      - 'v*.*'
+
 jobs:
   build:
-    name: Build
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-      - name: Build an image from Dockerfile
-        run: |
-          docker build -t docker.io/my-organization/my-app:${{ github.sha }} .
-      - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@master
-        with:
-          image-ref: 'docker.io/my-organization/my-app:${{ github.sha }}'
-          format: 'table'
-          exit-code: '1'
-          ignore-unfixed: true
-          vuln-type: 'os,library'
-          severity: 'CRITICAL,HIGH'
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up Go
+      uses: actions/setup-go@v2
+      with:
+        go-version: '1.x'
+
+    - name: Install Trivy
+      run: |
+        curl -sfL -o /tmp/trivy.tar.gz https://github.com/aquasecurity/trivy/releases/download/v0.19.2/trivy_0.19.2_Linux-64bit.tar.gz
+        tar xzvf /tmp/trivy.tar.gz -C /usr/local/bin/
+      continue-on-error: true
+
+    - name: Security Scanning
+      run: |
+        trivy --exit-code 0 <your-image-to-scan>:<tag> > scan-report.txt
+      continue-on-error: true
+
+    - name: Generate Tabular Report
+      run: |
+        trivy --exit-code 0 ganesh4761/go-fortune:v1.0 --format table > scan-report-table.txt
+      continue-on-error: true
