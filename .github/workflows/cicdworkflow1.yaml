@@ -1,0 +1,81 @@
+name: cicdworkflow1
+
+on:
+  push:
+    branches:
+      - 'v*.*'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up Go
+      uses: actions/setup-go@v2
+      with:
+        go-version: '1.x'
+
+    - name: Install Trivy
+      run: |
+        curl -sfL -o /tmp/trivy.tar.gz https://github.com/aquasecurity/trivy/releases/download/v0.19.2/trivy_0.19.2_Linux-64bit.tar.gz
+        tar xzvf /tmp/trivy.tar.gz -C /usr/local/bin/
+      continue-on-error: true
+
+    - name: Security Scanning
+      run: |
+        trivy --exit-code 0 ganesh4761/go-fortune:v1.0 > scan-report.txt
+      continue-on-error: true
+
+    - name: Generate Tabular Report
+      run: |
+        trivy --exit-code 0 ganesh4761/go-fortune:v1.0 --format table > scan-report-table.txt
+      continue-on-error: true
+
+
+    - name: Send Slack Notification (if vulnerabilities found)
+      uses: rtCamp/action-slack@v3
+      with:
+       text: 'Vulnerabilities found in the codebase.'
+       channel: 'your-slack-channel'
+      env:
+       SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+
+    - name: Build Docker Image
+      run: |
+         docker build -t your-image-name:${{ github.sha }} .
+
+
+    - name: Push Docker Image to Docker Hub
+      run: |
+           docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+           docker push your-image-name:${{ github.sha }}
+    
+    
+    - name: Sign Docker Image
+      run: |
+             cosign sign -key your-signing-key.pem your-image-name:${{ github.sha }}
+
+
+    - name: Send Slack Notification (on success)
+      uses: rtCamp/action-slack@v3
+      with:
+        text: |
+           Name: Ganesh Kumar
+           Matriculation number: A0285944M
+           Email: e1221756@u.nus.edu
+           Repository: ${{ github.repository }}
+           Docker Hub URL: Your Docker Hub URL
+        channel: 'your-slack-channel'
+      env:
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+
+    
+
+
+
+
