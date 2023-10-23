@@ -18,60 +18,53 @@ jobs:
       with:
         go-version: '1.x'
 
-    - name: Install Trivy
-      run: |
-        curl -sfL -o /tmp/trivy.tar.gz https://github.com/aquasecurity/trivy/releases/download/v0.19.2/trivy_0.19.2_Linux-64bit.tar.gz
-        tar xzvf /tmp/trivy.tar.gz -C /usr/local/bin/
-      continue-on-error: true
-
-    - name: Security Scanning
-      run: |
-        trivy --exit-code 0 ganesh4761/go-fortune:v1.0 > scan-report.txt
-      continue-on-error: true
-
-    - name: Generate Tabular Report
-      run: |
-        trivy --exit-code 0 ganesh4761/go-fortune:v1.0 --format table > scan-report-table.txt
-      continue-on-error: true
-
-
-    - name: Send Slack Notification (if vulnerabilities found)
-      uses: 8398a7/actions-slack@v3
+    - name: Run Trivy vulnerability scanner
+      uses: aquasecurity/trivy-action@master
       with:
-       text: 'Vulnerabilities found in the codebase.'
-       channel: 'your-slack-channel'
-      env:
-       SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        scan-type: 'fs'
+        ignore-unfixed: true
+        format: 'sarif'
+        output: 'trivy-results.sarif'
+        severity: 'CRITICAL'
 
 
-    - name: Build Docker Image
-      run: |
-         docker build -t your-image-name:${{ github.sha }} .
+    # - name: Send Slack Notification (if vulnerabilities found)
+    #   uses: 8398a7/actions-slack@v3
+    #   with:
+    #    text: 'Vulnerabilities found in the codebase.'
+    #    channel: 'your-slack-channel'
+    #   env:
+    #    SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
 
 
-    - name: Push Docker Image to Docker Hub
-      run: |
-           docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
-           docker push your-image-name:${{ github.sha }}
+    # - name: Build Docker Image
+    #   run: |
+    #      docker build -t your-image-name:${{ github.sha }} .
+
+
+    # - name: Push Docker Image to Docker Hub
+    #   run: |
+    #        docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+    #        docker push your-image-name:${{ github.sha }}
     
     
-    - name: Sign Docker Image
-      run: |
-             cosign sign -key your-signing-key.pem your-image-name:${{ github.sha }}
+    # - name: Sign Docker Image
+    #   run: |
+    #          cosign sign -key your-signing-key.pem your-image-name:${{ github.sha }}
 
 
-    - name: Send Slack Notification (on success)
-      uses: 8398a7/actions-slack@v3
-      with:
-        text: |
-           Name: Ganesh Kumar
-           Matriculation number: A0285944M
-           Email: e1221756@u.nus.edu
-           Repository: ${{ github.repository }}
-           Docker Hub URL: Your Docker Hub URL
-        channel: 'your-slack-channel'
-      env:
-        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+    # - name: Send Slack Notification (on success)
+    #   uses: 8398a7/actions-slack@v3
+    #   with:
+    #     text: |
+    #        Name: Ganesh Kumar
+    #        Matriculation number: A0285944M
+    #        Email: e1221756@u.nus.edu
+    #        Repository: ${{ github.repository }}
+    #        Docker Hub URL: Your Docker Hub URL
+    #     channel: 'your-slack-channel'
+    #   env:
+    #     SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
 
 
     
