@@ -10,8 +10,12 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
+    - uses: actions/checkout@v4
+      with:
+        ref: v1.0
+        #token: ${{ secrets.GIT_PAT }}
+        token: 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
+        
 
 
     - name: Run Trivy vulnerability scanner
@@ -22,6 +26,8 @@ jobs:
         format: 'table'
         #output: 'trivy-results.txt'
         severity: 'CRITICAL'
+
+
 
 
     # - name: Send Slack Notification (if vulnerabilities found)
