@@ -13,18 +13,14 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v2
 
-    - name: Set up Go
-      uses: actions/setup-go@v2
-      with:
-        go-version: '1.x'
 
     - name: Run Trivy vulnerability scanner
       uses: aquasecurity/trivy-action@master
       with:
         scan-type: 'fs'
         ignore-unfixed: true
-        format: table
-        output: 'trivy-results.txt'
+        format: 'table'
+        #output: 'trivy-results.txt'
         severity: 'CRITICAL'
 
 
