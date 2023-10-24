@@ -31,43 +31,43 @@ jobs:
 
 
 
-    # - name: Send Slack Notification (if vulnerabilities found)
-    #   uses: 8398a7/actions-slack@v3
-    #   with:
-    #    text: 'Vulnerabilities found in the codebase.'
-    #    channel: 'your-slack-channel'
-    #   env:
-    #    SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+    - name: Send Slack Notification (if vulnerabilities found)
+      uses: 8398a7/actions-slack@v3
+      with:
+       text: 'Vulnerabilities found in the codebase.'
+       channel: 'your-slack-channel'
+      env:
+       SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
 
 
-    # - name: Build Docker Image
-    #   run: |
-    #      docker build -t your-image-name:${{ github.sha }} .
+    - name: Build Docker Image
+      run: |
+         docker build -t your-image-name:${{ github.sha }} .
 
 
-    # - name: Push Docker Image to Docker Hub
-    #   run: |
-    #        docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
-    #        docker push your-image-name:${{ github.sha }}
+    - name: Push Docker Image to Docker Hub
+      run: |
+           docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+           docker push your-image-name:${{ github.sha }}
     
     
-    # - name: Sign Docker Image
-    #   run: |
-    #          cosign sign -key your-signing-key.pem your-image-name:${{ github.sha }}
+    - name: Sign Docker Image
+      run: |
+             cosign sign -key your-signing-key.pem your-image-name:${{ github.sha }}
 
 
-    # - name: Send Slack Notification (on success)
-    #   uses: 8398a7/actions-slack@v3
-    #   with:
-    #     text: |
-    #        Name: Ganesh Kumar
-    #        Matriculation number: A0285944M
-    #        Email: e1221756@u.nus.edu
-    #        Repository: ${{ github.repository }}
-    #        Docker Hub URL: Your Docker Hub URL
-    #     channel: 'your-slack-channel'
-    #   env:
-    #     SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+    - name: Send Slack Notification (on success)
+      uses: 8398a7/actions-slack@v3
+      with:
+        text: |
+           Name: Ganesh Kumar
+           Matriculation number: A0285944M
+           Email: e1221756@u.nus.edu
+           Repository: ${{ github.repository }}
+           Docker Hub URL: Your Docker Hub URL
+        channel: 'your-slack-channel'
+      env:
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
 
 
     
