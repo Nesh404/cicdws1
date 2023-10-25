@@ -43,7 +43,7 @@ jobs:
       with:
         token: ${{ secrets.SLACK_TOKEN }}
         path: trivy-results.txt
-        channel: test-submission
+        channel: ${{ vars.CHANNEL_NAME }}
         initial_comment: "scan report by Ganesh"
 
     - name: Login to Docker Hub
