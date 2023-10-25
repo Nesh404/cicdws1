@@ -18,7 +18,7 @@ jobs:
 
         
 
-    - name: Run Trivy vulnerability scanner
+    - name: scan for vulnerablity with trivy
       uses: aquasecurity/trivy-action@master
       with:
         scan-type: 'fs'
@@ -28,33 +28,39 @@ jobs:
         output: 'trivy-results.txt'
         severity: 'CRITICAL'
 
+    - name: Slack Notification
+      uses: rtCamp/action-slack-notify@v2
+      env:
+        # SLACK_CHANNEL: general
+        SLACK_COLOR: ${{ job.status }} # or a specific color like 'good' or '#ff00ff'
+        SLACK_ICON: https://github.com/rtCamp.png?size=48
+        SLACK_MESSAGE: 'success maesss'
+        SLACK_TITLE: NNN TITLE
+        SLACK_USERNAME: rtCamp
+        SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
 
 
 
-
-    # - name: Send Slack Notification (if vulnerabilities found)
-    #   uses: 8398a7/actions-slack@v3
-    #   with:
-    #    text: 'Vulnerabilities found in the codebase.'
-    #    channel: 'your-slack-channel'
-    #   env:
-    #    SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-
-
-    # - name: Build Docker Image
-    #   run: |
-    #      docker build -t your-image-name:${{ github.sha }} .
-
-
-    # - name: Push Docker Image to Docker Hub
-    #   run: |
-    #        docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
-    #        docker push your-image-name:${{ github.sha }}
     
-    
-    # - name: Sign Docker Image
-    #   run: |
-    #          cosign sign -key your-signing-key.pem your-image-name:${{ github.sha }}
+  # build_and_push:
+  #     needs: cve_scan
+  #     runs-on: windows-latest
+  #     steps:
+  #       - name: Check Out Code
+  #         uses: actions/checkout@v2
+  
+  #       - name: Build and Push Docker Image
+  #         id: build
+  #         uses: docker/build-push-action@v2
+  #         with:
+  #           context: . # Adjust the Dockerfile context
+  #           tags: "your-image-name:${{ github.sha }}"
+  #           push: true
+  #           registry: docker.io
+  #         env:
+  #           DOCKER_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+  #           DOCKER_PASSWORD: ${{ secrets.DOCKERHUB_TOKEN }}
+
 
 
     # - name: Send Slack Notification (on success)
