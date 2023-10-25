@@ -29,56 +29,70 @@ jobs:
         severity: 'CRITICAL'
 
     - name: Slack Notification
+      if: failure()
       uses: rtCamp/action-slack-notify@v2
       env:
         # SLACK_CHANNEL: general
         SLACK_COLOR: ${{ job.status }} # or a specific color like 'good' or '#ff00ff'
         SLACK_ICON: https://github.com/rtCamp.png?size=48
-        SLACK_MESSAGE: 'success maesss'
-        SLACK_TITLE: NNN TITLE
+        SLACK_MESSAGE: 'Failed trivy scan, see uploaded report'
+        SLACK_TITLE: Scan Failed - Ganesh
         SLACK_USERNAME: rtCamp
         SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
 
+    - name: Upload to slack step
+      if: failure()
+      uses: adrey/slack-file-upload-action@master
+      with:
+        token: ${{ secrets.SLACK_TOKEN }}
+        path: trivy-results.txt
+        channel: test-submission
+        initial_comment: "scan report by Ganesh"
 
+    - name: Login to Docker Hub
+      if: success()
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-    
-  # build_and_push:
-  #     needs: cve_scan
-  #     runs-on: windows-latest
-  #     steps:
-  #       - name: Check Out Code
-  #         uses: actions/checkout@v2
-  
-  #       - name: Build and Push Docker Image
-  #         id: build
-  #         uses: docker/build-push-action@v2
-  #         with:
-  #           context: . # Adjust the Dockerfile context
-  #           tags: "your-image-name:${{ github.sha }}"
-  #           push: true
-  #           registry: docker.io
-  #         env:
-  #           DOCKER_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
-  #           DOCKER_PASSWORD: ${{ secrets.DOCKERHUB_TOKEN }}
+    - name: Build and push
+      id: build-and-push
+      if: success()
+      uses: docker/build-push-action@v5
+      with:
+        push: true
+        tags: ${{ secrets.DOCKERHUB_USERNAME }}/cicdws1:${{ github.sha }}
 
+    - name: Install Cosign
+      if: success()
+      uses: sigstore/cosign-installer@v3.1.1
+      with:
+        cosign-release: 'v2.2.0'
 
+    - name: Sign image with a key
+      if: success()
+      run: |
+        cosign sign --yes --key env://COSIGN_PRIVATE_KEY "${TAGS}@${DIGEST}"
+      env:
+        TAGS: ${{ secrets.DOCKERHUB_USERNAME }}/cicdws1:${{ github.sha }}
+        COSIGN_PRIVATE_KEY: ${{ secrets.COSIGN_PRIVATE_KEY }}
+        COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
+        DIGEST: ${{ steps.build-and-push.outputs.digest }}
 
-    # - name: Send Slack Notification (on success)
-    #   uses: 8398a7/actions-slack@v3
-    #   with:
-    #     text: |
-    #        Name: Ganesh Kumar
-    #        Matriculation number: A0285944M
-    #        Email: e1221756@u.nus.edu
-    #        Repository: ${{ github.repository }}
-    #        Docker Hub URL: Your Docker Hub URL
-    #     channel: 'your-slack-channel'
-    #   env:
-    #     SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-
-
-    
-
-
-
-
+    - name: Slack Notification
+      if: success()
+      uses: rtCamp/action-slack-notify@v2
+      env:
+        # SLACK_CHANNEL: general
+        SLACK_COLOR: ${{ job.status }} # or a specific color like 'good' or '#ff00ff'
+        SLACK_ICON: https://github.com/rtCamp.png?size=48
+        SLACK_MESSAGE: |
+               Name: Ganesh Kumar
+               Matriculation number: A0285944M
+               Email: e1221756@u.nus.edu
+               Repository: ${{ github.repository }}
+               Docker Hub URL: https://hub.docker.com/r/ganesh4761/cicdws1
+        SLACK_TITLE: Image build and signed
+        SLACK_USERNAME: rtCamp
+        SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
