@@ -12,10 +12,11 @@ jobs:
     steps:
     - uses: actions/checkout@v4
       with:
-        ref: ${{ github.ref_name}}
+        ref: ${{ github.ref}}
         token:  ${{github.token}}
         
 
+        
 
     - name: Run Trivy vulnerability scanner
       uses: aquasecurity/trivy-action@master
